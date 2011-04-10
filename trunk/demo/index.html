@@ -16,6 +16,7 @@ var js4swf = {
         // 开始上传 (选择文件后自动开始)
         this.debug('start', data);
         
+        this.showMessage('开始上传: ' + data.fileName);
         getById('frmMain').file.value = '';
         getById('frmMain').btnSubmit.disabled = 'disabled';
         
@@ -24,12 +25,15 @@ var js4swf = {
     {
         // 上传取消事件
         this.debug('cancel', data);
+        
+        this.showMessage('取消上传: ' + data.fileName);
     },
     onComplete: function(data)
     {
         // 上传完成事件 (包含文件信息和完成后返回数据(data))
         this.debug('complete', data);
         
+        this.showMessage(data.fileName + ' 上传完成!');
         getById('frmMain').btnSubmit.disabled = '';
         getById('frmMain').file.value = data.fileName;
     },
