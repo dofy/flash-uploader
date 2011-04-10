@@ -15,9 +15,9 @@ package org.phpz.comm
             _data = value;
         }
         
-        public static function attr(key:String):*
+        public static function attr(key:String, defaultValue:* = null):*
         {
-            return _data[key] || null;
+            return _data[key] || defaultValue;
         }
         
     }

@@ -6,8 +6,8 @@
     <movie input="" />
     <movie path="bin\flashUploader.swf" />
     <movie fps="30" />
-    <movie width="800" />
-    <movie height="600" />
+    <movie width="300" />
+    <movie height="100" />
     <movie version="10" />
     <movie background="#FFFFFF" />
   </output>
@@ -49,7 +49,6 @@
   <libraryPaths>
     <element path="lib\skin.swc" />
     <element path="lib\JSON.swc" />
-    <element path="lib\alcon.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

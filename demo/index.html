@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Seven Uploader Demo </title>
+<meta name="generator" content="editplus" />
+<meta name="author" content="Seven Yu" />
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<meta charset="UTF-8" />
+<script type="text/javascript" src="swfobject.js"></script>
+<script >
+<!--
+var js4swf = {
+    onStart: function()
+    {
+        // 开始上传 (选择文件后自动开始)
+        this.debug('start');
+    },
+    onCancel: function()
+    {
+        // 上传取消事件
+        this.debug('cancel');
+    },
+    onComplete: function(evt)
+    {
+        // 上传完成事件 (包含文件信息和完成后返回数据(data))
+        this.debug('complete', evt);
+    },
+    onError: function(evt)
+    {
+        // 报错事件 (key, message)
+        this.showMessage(evt.message);
+        this.debug('error', evt);
+    },
+    showMessage: function()
+    {
+        document.getElementById('output').innerHTML = arguments[0];
+    },
+    debug: function()
+    {
+        console && console.log(arguments);
+    }
+};
+
+function checkForm(frm)
+{
+    if(isEmpty(frm.title) || isEmpty(frm.desc))
+    {
+        js4swf.showMessage('请把资料填写完整.');
+        return false;
+    }
+    
+    if(isEmpty(frm.file))
+    {
+        js4swf.showMessage('上传尚未完成.');
+        return false;
+    }
+    
+    js4swf.showMessage('表单成功提交');
+    return false;
+}
+
+function isEmpty(item)
+{
+    return trim(item.value) == ''
+}
+
+function trim(str)
+{
+    return str.replace('^\s+|\s+$/g', '');
+}
+//-->
+</script>
+</head>
+
+<body>
+
+<!--
+按钮大小是 84 * 25
+-->
+
+<div id="output"></div>
+
+<form id="frmMain" method="post" action="" onsubmit="return checkForm(this);" >
+
+<!-- 嵌入 Flash -->
+<div id="flashUploader"></div>
+<script type="text/javascript">
+var flashvars = { jsobj: "js4swf", url: "upload.php" };
+var params = { allowScriptAccess: "allways" };
+var attributes = { };
+swfobject.embedSWF("../bin/flashUploader.swf", "flashUploader", "450", "45", "10.0.0", null, flashvars, params, attributes);
+</script>
+
+<!-- 表单内容 -->
+<div>标题: <input type="text" name="title" /> </div>
+<div>描述: <textarea name="desc" cols="40" rows="5" ></textarea></div>
+
+<input type="hidden" name="file" />
+
+<div><input type="submit" name="btnSubmit" disabled="disabled" /></div>
+
+</form>
+
+</body>
+</html>
