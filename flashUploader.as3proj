@@ -7,7 +7,7 @@
     <movie path="bin\flashUploader.swf" />
     <movie fps="30" />
     <movie width="300" />
-    <movie height="100" />
+    <movie height="45" />
     <movie version="10" />
     <movie background="#FFFFFF" />
   </output>
