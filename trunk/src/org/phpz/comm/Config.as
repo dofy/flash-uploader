@@ -26,10 +26,15 @@ package org.phpz.comm
 
 
         // === 上传配置 ===
-        public static const MAX_SIZE:Number = 20 * 1024 * 1024; // 默认最大文件大小 (byte)
+        public static const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
+        
         // === 运行时变量 ===
-        public static var type:String; // 类型
+        public static var id:String;
+        public static var maxSize:uint = 0;
+        public static var types:String; // 类型
+        public static var name:String;
+        public static var url:String;
 
         public static function get CAPTION():String
         {
