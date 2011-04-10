@@ -1,5 +1,6 @@
 package
 {
+    import com.maccherone.json.JSON;
     import flash.display.Sprite;
     import flash.display.StageAlign;
     import flash.display.StageScaleMode;
@@ -45,7 +46,7 @@ package
         private const NAME:String = 'Seven Uploader';
         private const VERS_1:uint = 1; // 主版本号
         private const VERS_2:uint = 0; // 里程碑版本号
-        private const VERS_3:uint = 3; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+        private const VERS_3:uint = 7; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
 
         private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
@@ -318,12 +319,12 @@ package
         {
             if (!upURL)
             {
-                JsProxy.call('onWarn', {id: upId, message: '上传地址错误!'});
+                JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: '上传地址错误!'});
                 return false;
             }
             if (file.size > upMaxSize)
             {
-                JsProxy.call('onWarn', {id: upId, message: Tool.formatString('文件不能超过 {0}Mbs, 当前文件 {1}Mbs.', upMaxSize / 1024 / 1024, Math.round(file.size / 1024 / 1024 * 100) / 100)});
+                JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: Tool.formatString('文件不能超过 {0}Mbs, 当前文件 {1}Mbs.', upMaxSize / 1024 / 1024, Math.round(file.size / 1024 / 1024 * 100) / 100)});
                 return false;
             }
 
@@ -361,7 +362,15 @@ package
          */
         private function completeHandler(evt:DataEvent):void
         {
-            JsProxy.call('onComplete', {id: upId, fileName: fileRef.name, data: evt.data});
+            try
+            {
+                var json:Object = JSON.decode(evt.data);
+                JsProxy.call('onComplete', {id: upId, fileName: fileRef.name, data: json});
+            }
+            catch (e:Error)
+            {
+                JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: '服务器发生错误!'});
+            }
             removeEvents();
         }
 
@@ -371,7 +380,7 @@ package
          */
         private function errorHandler(evt:IOErrorEvent):void
         {
-            JsProxy.call('onWarn', { id: upId, message: '上传失败!' } );
+            JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: '上传失败!'});
             removeEvents();
         }
 

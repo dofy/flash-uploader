@@ -11,37 +11,37 @@
 <script >
 <!--
 var js4swf = {
-    onStart: function(data)
+    onStart: function(evt)
     {
         // 开始上传 (选择文件后自动开始)
-        this.debug('start', data);
+        this.debug('start', evt);
         
-        this.showMessage('开始上传: ' + data.fileName);
+        this.showMessage('开始上传: ' + evt.fileName);
         getById('frmMain').file.value = '';
         getById('frmMain').btnSubmit.disabled = 'disabled';
         
     },
-    onCancel: function(data)
+    onCancel: function(evt)
     {
         // 上传取消事件
-        this.debug('cancel', data);
+        this.debug('cancel', evt);
         
-        this.showMessage('取消上传: ' + data.fileName);
+        this.showMessage('取消上传: ' + evt.fileName);
     },
-    onComplete: function(data)
+    onComplete: function(evt)
     {
-        // 上传完成事件 (包含文件信息和完成后返回数据(data))
-        this.debug('complete', data);
+        // 上传完成事件 (包含文件信息和完成后返回数据(evt.data))
+        this.debug('complete', evt);
         
-        this.showMessage(data.fileName + ' 上传完成!');
+        this.showMessage(evt.fileName + ' 上传完成!');
         getById('frmMain').btnSubmit.disabled = '';
-        getById('frmMain').file.value = data.fileName;
+        getById('frmMain').file.value = evt.fileName;
     },
-    onWarn: function(data)
+    onWarn: function(evt)
     {
-        // 报错事件 (key, message)
-        this.showMessage(data.message);
-        this.debug('warn', data);
+        // 报错事件 (evt.message)
+        this.showMessage(evt.message);
+        this.debug('warn', evt);
     },
     showMessage: function()
     {
