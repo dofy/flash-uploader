@@ -412,7 +412,7 @@ package
 
             CONFIG::release
             {
-                vars[2]++;
+                vers[2]++;
             }
 
             return NAME + ' ( version ' + vers.join('.') + ' )';
