@@ -1,0 +1,18 @@
+#summary 与 js 交互的事件
+
+== 介绍 ==
+
+上传过程对应的事件, 主要用于与 js 交互.
+
+
+== 详细描述 ==
+
+当事件发生时, 调用响应的 `jsobj.onEvent()` 方法, 事件包括:
+ * `onStart`: 开始上传
+ * `onCancel`: 取消上传
+ * `onComplete`: 上传完成
+ * `onWarn`: 发生错误
+参数为一 `Object`, 所有参数都包括 `id` 和 `fileName` 属性, 
+此外:
+ * `onWarn` 包含一个 `message` 属性, 是对错误信息的描述
+ * `onComplete` 包含 `data` 属性, 是后台上传程序返回的数据
