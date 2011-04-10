@@ -11,26 +11,33 @@
 <script >
 <!--
 var js4swf = {
-    onStart: function()
+    onStart: function(data)
     {
         // 开始上传 (选择文件后自动开始)
-        this.debug('start');
+        this.debug('start', data);
+        
+        getById('frmMain').file.value = '';
+        getById('frmMain').btnSubmit.disabled = 'disabled';
+        
     },
-    onCancel: function()
+    onCancel: function(data)
     {
         // 上传取消事件
-        this.debug('cancel');
+        this.debug('cancel', data);
     },
-    onComplete: function(evt)
+    onComplete: function(data)
     {
         // 上传完成事件 (包含文件信息和完成后返回数据(data))
-        this.debug('complete', evt);
+        this.debug('complete', data);
+        
+        getById('frmMain').btnSubmit.disabled = '';
+        getById('frmMain').file.value = data.fileName;
     },
-    onError: function(evt)
+    onWarn: function(data)
     {
         // 报错事件 (key, message)
-        this.showMessage(evt.message);
-        this.debug('error', evt);
+        this.showMessage(data.message);
+        this.debug('warn', data);
     },
     showMessage: function()
     {
@@ -41,6 +48,11 @@ var js4swf = {
         console && console.log(arguments);
     }
 };
+
+function getById(id)
+{
+    return document.getElementById(id);
+}
 
 function checkForm(frm)
 {
@@ -86,7 +98,7 @@ function trim(str)
 <!-- 嵌入 Flash -->
 <div id="flashUploader"></div>
 <script type="text/javascript">
-var flashvars = { jsobj: "js4swf", url: "upload.php" };
+var flashvars = { id: 1, jsobj: "js4swf", url: "../demo/upload.php" };
 var params = { allowScriptAccess: "allways" };
 var attributes = { };
 swfobject.embedSWF("../bin/flashUploader.swf", "flashUploader", "450", "45", "10.0.0", null, flashvars, params, attributes);

@@ -1,4 +1,4 @@
-package 
+package
 {
     import flash.display.Sprite;
     import flash.display.StageAlign;
@@ -16,30 +16,48 @@ package
     import flash.text.TextFormatAlign;
     import flash.ui.ContextMenu;
     import flash.ui.ContextMenuItem;
-    import org.phpz.comm.Config;
     import org.phpz.comm.FlashVars;
     import org.phpz.display.components.seven.Button;
     import org.phpz.display.components.seven.ProgressBar;
     import org.phpz.display.skins.DefaultSkin;
     import org.phpz.utils.JsProxy;
     import org.phpz.utils.Tool;
-	
-	/**
-	 * Flash 上传控件
-	 * @author Seven Yu
+
+    /**
+     * Flash 上传控件
+     * @author Seven Yu
      * @uri http://code.google.com/p/flash-uploader/
-	 */
-	public class Main extends Sprite 
-	{
-		
+     */
+    public class Main extends Sprite
+    {
+
         private const PADDING:int = 10;
         private const SMALL_PADDING:int = 3;
 
         private const TEXT_WIDTH:int = 200;
         private const TEXT_HEIGHT:int = 20;
-        
+
+        private const SIZE_FULL:uint = 0;
+        private const SIZE_BIG:uint = 450;
+        private const SIZE_MID:uint = 350;
+        private const SIZE_SML:uint = 200;
+
+        private const NAME:String = 'Seven Uploader';
+        private const VERS_1:uint = 1; // 主版本号
+        private const VERS_2:uint = 0; // 里程碑版本号
+        private const VERS_3:uint = 1; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+
+        private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
+
+
+        private var upId:String;
+        private var upURL:String;
+        private var upName:String;
+        private var upTypes:String;
+        private var upMaxSize:uint;
+
         private var skin:DefaultSkin = new DefaultSkin();
-        
+
         private var selectBtn:Button;
         private var cancelBtn:Button;
         private var progressBar:ProgressBar;
@@ -48,65 +66,67 @@ package
         private var txtSpeed:TextField;
         private var txtLeft:TextField;
 
+        private var tf:TextFormat = new TextFormat('Verdana', 12, 0x008000);
         private var fileRef:FileReference = new FileReference();
-        
+
+        private var _sizeMode:uint = SIZE_FULL;
+
         private var _time:Number;
-        
+
         private var _types:Array;
-        
-        
-		public function Main():void 
-		{
-			if (stage) init();
-			else addEventListener(Event.ADDED_TO_STAGE, init);
-		}
-		
-		private function init(e:Event = null):void 
-		{
-			removeEventListener(Event.ADDED_TO_STAGE, init);
-			// entry point
+
+
+        public function Main():void
+        {
+            if (stage)
+                init();
+            else
+                addEventListener(Event.ADDED_TO_STAGE, init);
+        }
+
+        private function init(e:Event = null):void
+        {
+            removeEventListener(Event.ADDED_TO_STAGE, init);
+            // entry point
 
             // align && scale mode
             stage.align = StageAlign.TOP_LEFT;
             stage.scaleMode = StageScaleMode.NO_SCALE;
-            
+
             stage.addEventListener(Event.RESIZE, resize);
-            
+
             initConfig();
             initUI();
-		}
-        
+        }
+
         /**
          * 初始化配置
          */
-        private function initConfig():void 
+        private function initConfig():void
         {
             FlashVars.data = loaderInfo.parameters;
-            
+
             JsProxy.init(FlashVars.attr('jsobj'));
-            
-            Config.id = FlashVars.attr('id');
-            Config.url = FlashVars.attr('url');
-            Config.name = FlashVars.attr('name', 'userfile');
-            Config.types = FlashVars.attr('types', '*');
-            Config.maxSize = FlashVars.attr('maxsize', Config.MAX_SIZE) * 1024 * 1024;
-            
+
+            upId = FlashVars.attr('id');
+            upURL = FlashVars.attr('url');
+            upName = FlashVars.attr('name', 'userfile');
+            upTypes = FlashVars.attr('types', '*');
+            upMaxSize = FlashVars.attr('maxsize', MAX_SIZE) * 1024 * 1024;
         }
-        
+
         /**
          * 初始化界面
          */
-        private function initUI():void 
+        private function initUI():void
         {
             // context menu
             var menu:ContextMenu = new ContextMenu();
             menu.hideBuiltInItems();
-            menu.customItems.push(new ContextMenuItem(Config.CAPTION, false, false));
+            menu.customItems.push(new ContextMenuItem(CAPTION, false, false));
             contextMenu = menu;
-            
-            // create ui
-            var tf:TextFormat = new TextFormat('vrinda', 12, 0x008000);
 
+            // create ui
             selectBtn = new Button(skin.btnSelectUp, skin.btnSelectOver, skin.btnSelectDown, skin.btnSelectDisable, selectBtnHandler);
             cancelBtn = new Button(skin.btnCancelUp, skin.btnCancelOver, skin.btnCancelDown, skin.btnCancelDisable, cancelBtnHandler);
             progressBar = new ProgressBar(skin.progressFrontBar, skin.progressMaskBar, skin.progressMiddleBar, skin.progressBottomBar);
@@ -126,18 +146,21 @@ package
             txtPercent.height = txtSpeed.height = txtLeft.height = TEXT_HEIGHT;
             txtPercent.selectable = txtSpeed.selectable = txtLeft.selectable = false;
 
-            addChild(selectBtn);
-            addChild(cancelBtn);
             addChild(progressBar);
             addChild(txtPercent);
             addChild(txtSpeed);
             addChild(txtLeft);
-            
+
+            addChild(selectBtn);
+            addChild(cancelBtn);
+
+            txtPercent.text = '请选择文件...';
+
             resetButtons();
-            
+
             resize();
         }
-        
+
         /**
          * 重置按钮状态
          */
@@ -146,21 +169,86 @@ package
             cancelBtn.visible = false;
             selectBtn.enabled = true;
         }
-        
+
         private function resize(evt:Event = null):void
         {
+            resetUI();
+
             selectBtn.x = cancelBtn.x = stage.stageWidth - selectBtn.width - PADDING;
             selectBtn.y = cancelBtn.y = Math.round((stage.stageHeight - selectBtn.height) / 2);
 
-            progressBar.x = PADDING;
-            progressBar.y = Math.round((stage.stageHeight - progressBar.height) / 2);
-            progressBar.width = Math.round(stage.stageWidth - selectBtn.width - PADDING * 3);
+            // 进度条 & 本分比
+            if (stage.stageWidth > SIZE_SML)
+            {
+                progressBar.x = PADDING;
+                progressBar.y = Math.round((stage.stageHeight - progressBar.height) / 2);
+                progressBar.width = Math.round(stage.stageWidth - selectBtn.width - PADDING * 3);
+                txtPercent.x = progressBar.x + SMALL_PADDING;
+            }
 
-            txtPercent.x = progressBar.x + SMALL_PADDING;
-            txtSpeed.x = progressBar.x + (progressBar.width - TEXT_WIDTH) / 2;
-            txtLeft.x = progressBar.x + progressBar.width - TEXT_WIDTH - SMALL_PADDING;
+            // 剩余时间
+            if (stage.stageWidth > SIZE_BIG)
+            {
+                txtLeft.x = progressBar.x + progressBar.width - TEXT_WIDTH - SMALL_PADDING;
+            }
+
+            // 速度
+            if (stage.stageWidth > SIZE_BIG)
+            {
+                txtSpeed.x = progressBar.x + (progressBar.width - TEXT_WIDTH) / 2;
+            }
+            else if (stage.stageWidth > SIZE_MID)
+            {
+                txtSpeed.x = progressBar.x + progressBar.width - TEXT_WIDTH - SMALL_PADDING;
+            }
 
             txtPercent.y = txtSpeed.y = txtLeft.y = progressBar.y + (progressBar.height - TEXT_HEIGHT) / 2;
+        }
+
+        private function resetUI():void
+        {
+            if (stage.stageWidth <= SIZE_SML)
+            {
+                if (_sizeMode != SIZE_SML)
+                {
+                    _sizeMode = SIZE_SML;
+                    progressBar.visible = txtPercent.visible = txtSpeed.visible = txtLeft.visible = false;
+                }
+            }
+            else if (stage.stageWidth <= SIZE_MID)
+            {
+                if (_sizeMode != SIZE_MID)
+                {
+                    _sizeMode = SIZE_MID;
+                    progressBar.visible = txtPercent.visible = true;
+                    txtSpeed.visible = txtLeft.visible = false;
+                }
+            }
+            else if (stage.stageWidth <= SIZE_BIG)
+            {
+                if (_sizeMode != SIZE_BIG)
+                {
+                    _sizeMode = SIZE_BIG;
+                    progressBar.visible = txtPercent.visible = txtSpeed.visible = true;
+                    txtLeft.visible = false;
+
+                    tf.align = TextFormatAlign.RIGHT;
+                    txtSpeed.defaultTextFormat = tf;
+                    txtSpeed.text = txtSpeed.text;
+                }
+            }
+            else
+            {
+                if (_sizeMode != SIZE_FULL)
+                {
+                    _sizeMode = SIZE_FULL;
+                    progressBar.visible = txtPercent.visible = txtSpeed.visible = txtLeft.visible = true;
+
+                    tf.align = TextFormatAlign.CENTER;
+                    txtSpeed.defaultTextFormat = tf;
+                    txtSpeed.text = txtSpeed.text;
+                }
+            }
         }
 
         private function bindEvents():void
@@ -182,26 +270,37 @@ package
             resetButtons();
         }
 
+        /**
+         * 浏览文件
+         * @param	evt
+         */
         private function selectBtnHandler(evt:MouseEvent):void
         {
             bindEvents();
             fileRef.browse(types);
         }
 
+        /**
+         * 取消上传
+         * @param	evt
+         */
         private function cancelBtnHandler(evt:MouseEvent):void
         {
             removeEvents();
             fileRef.cancel();
-            JsProxy.call('onCancel', { id:Config.id } );
+            JsProxy.call('onCancel', {id: upId, fileName: fileRef.name});
         }
-        
-        private function selectHandler(evt:Event):void 
+
+        /**
+         * 打开文件
+         * @param	evt
+         */
+        private function selectHandler(evt:Event):void
         {
             if (checkFile(fileRef))
             {
-                JsProxy.call('onStart', { id:Config.id, fileName:fileRef.name } );
                 selectBtn.enabled = false;
-                fileRef.upload(new URLRequest(Config.url), Config.name);
+                fileRef.upload(new URLRequest(upURL), upName);
                 _time = new Date().getTime();
             }
             else
@@ -209,61 +308,83 @@ package
                 removeEvents();
             }
         }
-        
-        private function checkFile(file:FileReference):Boolean 
+
+        /**
+         * 检测文件合法性
+         * @param	file
+         * @return
+         */
+        private function checkFile(file:FileReference):Boolean
         {
-            if (!Config.url)
+            if (!upURL)
             {
-                JsProxy.call('onError', { id:Config.id, message:'上传地址错误!' } );
-            }
-            if (file.size > Config.maxSize)
-            {
-                JsProxy.call('onError', { id: Config.id, message:Tool.formatString('文件不能超过 {0}Mbs.', Config.maxSize / 1024 / 1024) } );
+                JsProxy.call('onWarn', {id: upId, message: '上传地址错误!'});
                 return false;
             }
-            
+            if (file.size > upMaxSize)
+            {
+                JsProxy.call('onWarn', {id: upId, message: Tool.formatString('文件不能超过 {0}Mbs, 当前文件 {1}Mbs.', upMaxSize / 1024 / 1024, Math.round(file.size / 1024 / 1024 * 100) / 100)});
+                return false;
+            }
+
             return true;
         }
-        
-        private function openHandler(evt:Event):void 
+
+        /**
+         * 开始上传
+         * @param	evt
+         */
+        private function openHandler(evt:Event):void
         {
             cancelBtn.visible = true;
-            JsProxy.call('onOpen', { id:Config.id } );
+            JsProxy.call('onStart', {id: upId, fileName: fileRef.name});
         }
 
+        /**
+         * 上传进度
+         * @param	evt
+         */
         private function progressHandler(evt:ProgressEvent):void
         {
             var speed:Number = Math.round(evt.bytesLoaded / (new Date().getTime() - _time) * 100) / 100;
             var per:Number = evt.bytesLoaded / evt.bytesTotal
             progressBar.percent = per;
-            
+
             txtPercent.text = Tool.formatString('已上传: {0}%', Math.round(per * 100));
             txtSpeed.text = Tool.formatString('上传速度: {0} KB/s', speed);
             txtLeft.text = Tool.formatString('剩余: {0} 秒', Math.round((evt.bytesTotal - evt.bytesLoaded) / 1000 / speed));
         }
-        
-        private function completeHandler(evt:DataEvent):void 
+
+        /**
+         * 上传完成
+         * @param	evt
+         */
+        private function completeHandler(evt:DataEvent):void
         {
-            JsProxy.call('onComplete', { id:Config.id, fileName:fileRef.name, data:evt.data } );
+            JsProxy.call('onComplete', {id: upId, fileName: fileRef.name, data: evt.data});
             removeEvents();
         }
-        
-        private function errorHandler(evt:IOErrorEvent):void 
+
+        /**
+         * 上传地址错误
+         * @param	evt
+         */
+        private function errorHandler(evt:IOErrorEvent):void
         {
-            JsProxy.call('onError', { id:Config.id, message:'上传失败!' } );
+            JsProxy.call('onWarn', { id: upId, message: '上传失败!' } );
             removeEvents();
         }
-        
+
         /**
          * 打开文件对话框文件类型过滤器
          */
-        public function get types():Array 
+        public function get types():Array
         {
             if (!_types)
             {
                 _types = [];
-                var arrFilters:Array = Config.types.split(';');
-                for (var i:int = 0, len:int = arrFilters.length; i < len; i++) 
+                var arrFilters:Array = upTypes.split(';');
+                for (var i:int = 0, len:int = arrFilters.length; i < len; i++)
                 {
                     var filter:Array = arrFilters[i].split(':');
                     if (filter.length == 1)
@@ -281,7 +402,22 @@ package
             }
             return _types;
         }
-		
-	}
-	
+
+        /**
+         * 版本信息
+         */
+        private function get CAPTION():String
+        {
+            var vers:Array = [VERS_1, VERS_2, VERS_3];
+
+            CONFIG::release
+            {
+                vars[2]++;
+            }
+
+            return NAME + ' ( version ' + vers.join('.') + ' )';
+        }
+
+    }
+
 }
