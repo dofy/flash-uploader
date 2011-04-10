@@ -45,7 +45,7 @@ package
         private const NAME:String = 'Seven Uploader';
         private const VERS_1:uint = 1; // 主版本号
         private const VERS_2:uint = 0; // 里程碑版本号
-        private const VERS_3:uint = 1; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+        private const VERS_3:uint = 3; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
 
         private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
