@@ -39,14 +39,14 @@ package
         private const TEXT_HEIGHT:int = 20;
 
         private const SIZE_FULL:uint = 0;
-        private const SIZE_BIG:uint = 450;
-        private const SIZE_MID:uint = 360;
-        private const SIZE_SML:uint = 210;
+        private const SIZE_BIG:uint = 440;
+        private const SIZE_MID:uint = 330;
+        private const SIZE_SML:uint = 190;
 
         private const NAME:String = 'Seven Uploader';
         private const VERS_1:uint = 1; // 主版本号
         private const VERS_2:uint = 1; // 里程碑版本号
-        private const VERS_3:uint = 3; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+        private const VERS_3:uint = 5; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
 
         private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
@@ -113,7 +113,7 @@ package
             JsProxy.init(FlashVars.attr('jsobj'));
 
             upId = FlashVars.attr('id');
-            upURL = FlashVars.attr('url');
+            upURL = FlashVars.attr('url', 'http://localhost/');
             upName = FlashVars.attr('name', 'userfile');
             upTypes = FlashVars.attr('types', '*');
             upMaxSize = FlashVars.attr('maxsize', MAX_SIZE) * 1024 * 1024;
@@ -180,7 +180,7 @@ package
 
             if (stage.stageWidth >= SIZE_SML)
             {
-                selectBtn.x = cancelBtn.x = stage.stageWidth - selectBtn.width - PADDING;
+                selectBtn.x = cancelBtn.x = stage.stageWidth - selectBtn.width;
             }
             else
             {
@@ -191,9 +191,9 @@ package
             // 进度条 & 本分比
             if (stage.stageWidth >= SIZE_SML)
             {
-                progressBar.x = PADDING;
+                progressBar.x = 0;
                 progressBar.y = Math.round((stage.stageHeight - progressBar.height) / 2);
-                progressBar.width = Math.round(stage.stageWidth - selectBtn.width - PADDING * 3);
+                progressBar.width = Math.round(stage.stageWidth - selectBtn.width - PADDING);
                 txtPercent.x = progressBar.x + SMALL_PADDING;
             }
 
