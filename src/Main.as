@@ -40,13 +40,13 @@ package
 
         private const SIZE_FULL:uint = 0;
         private const SIZE_BIG:uint = 450;
-        private const SIZE_MID:uint = 350;
-        private const SIZE_SML:uint = 200;
+        private const SIZE_MID:uint = 360;
+        private const SIZE_SML:uint = 210;
 
         private const NAME:String = 'Seven Uploader';
         private const VERS_1:uint = 1; // 主版本号
         private const VERS_2:uint = 1; // 里程碑版本号
-        private const VERS_3:uint = 1; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+        private const VERS_3:uint = 3; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
 
         private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
@@ -75,7 +75,7 @@ package
         private var _time:Number;
 
         private var _types:Array;
-        
+
         private var _typeReg:RegExp;
         private var _exts:Array = [];
 
@@ -178,11 +178,18 @@ package
         {
             resetUI();
 
-            selectBtn.x = cancelBtn.x = stage.stageWidth - selectBtn.width - PADDING;
+            if (stage.stageWidth >= SIZE_SML)
+            {
+                selectBtn.x = cancelBtn.x = stage.stageWidth - selectBtn.width - PADDING;
+            }
+            else
+            {
+                selectBtn.x = cancelBtn.x = 0;
+            }
             selectBtn.y = cancelBtn.y = Math.round((stage.stageHeight - selectBtn.height) / 2);
 
             // 进度条 & 本分比
-            if (stage.stageWidth > SIZE_SML)
+            if (stage.stageWidth >= SIZE_SML)
             {
                 progressBar.x = PADDING;
                 progressBar.y = Math.round((stage.stageHeight - progressBar.height) / 2);
@@ -191,17 +198,17 @@ package
             }
 
             // 剩余时间
-            if (stage.stageWidth > SIZE_BIG)
+            if (stage.stageWidth >= SIZE_BIG)
             {
                 txtLeft.x = progressBar.x + progressBar.width - TEXT_WIDTH - SMALL_PADDING;
             }
 
             // 速度
-            if (stage.stageWidth > SIZE_BIG)
+            if (stage.stageWidth >= SIZE_BIG)
             {
                 txtSpeed.x = progressBar.x + (progressBar.width - TEXT_WIDTH) / 2;
             }
-            else if (stage.stageWidth > SIZE_MID)
+            else if (stage.stageWidth >= SIZE_MID)
             {
                 txtSpeed.x = progressBar.x + progressBar.width - TEXT_WIDTH - SMALL_PADDING;
             }
@@ -211,7 +218,7 @@ package
 
         private function resetUI():void
         {
-            if (stage.stageWidth <= SIZE_SML)
+            if (stage.stageWidth < SIZE_SML)
             {
                 if (_sizeMode != SIZE_SML)
                 {
@@ -219,7 +226,7 @@ package
                     progressBar.visible = txtPercent.visible = txtSpeed.visible = txtLeft.visible = false;
                 }
             }
-            else if (stage.stageWidth <= SIZE_MID)
+            else if (stage.stageWidth < SIZE_MID)
             {
                 if (_sizeMode != SIZE_MID)
                 {
@@ -228,7 +235,7 @@ package
                     txtSpeed.visible = txtLeft.visible = false;
                 }
             }
-            else if (stage.stageWidth <= SIZE_BIG)
+            else if (stage.stageWidth < SIZE_BIG)
             {
                 if (_sizeMode != SIZE_BIG)
                 {
@@ -328,7 +335,7 @@ package
             var ext:String = Tool.getFileType(file, false);
             if (!typeReg.test(ext))
             {
-                JsProxy.call('onWarn', { id: upId, fileName: fileRef.name, message: Tool.formatString('不被允许的文件类型: {0}', ext) } );
+                JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: Tool.formatString('不被允许的文件类型: {0}', ext)});
                 return false;
             }
             if (file.size > upMaxSize)
@@ -424,11 +431,11 @@ package
             }
             return _types;
         }
-        
+
         /**
          * 匹配扩展名的正则
          */
-        private function get typeReg():RegExp 
+        private function get typeReg():RegExp
         {
             if (!_typeReg)
             {
