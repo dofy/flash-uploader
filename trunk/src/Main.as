@@ -45,8 +45,8 @@ package
 
         private const NAME:String = 'Seven Uploader';
         private const VERS_1:uint = 1; // 主版本号
-        private const VERS_2:uint = 0; // 里程碑版本号
-        private const VERS_3:uint = 7; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
+        private const VERS_2:uint = 1; // 里程碑版本号
+        private const VERS_3:uint = 1; // 编译版本号 保持奇数, 以区分 debug 版 (奇数) 和 release 版 (偶数)
 
         private const MAX_SIZE:Number = 20; // 默认最大文件大小 (Mbs)
 
@@ -75,6 +75,9 @@ package
         private var _time:Number;
 
         private var _types:Array;
+        
+        private var _typeReg:RegExp;
+        private var _exts:Array = [];
 
 
         public function Main():void
@@ -322,6 +325,12 @@ package
                 JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: '上传地址错误!'});
                 return false;
             }
+            var ext:String = Tool.getFileType(file, false);
+            if (!typeReg.test(ext))
+            {
+                JsProxy.call('onWarn', { id: upId, fileName: fileRef.name, message: Tool.formatString('不被允许的文件类型: {0}', ext) } );
+                return false;
+            }
             if (file.size > upMaxSize)
             {
                 JsProxy.call('onWarn', {id: upId, fileName: fileRef.name, message: Tool.formatString('文件不能超过 {0}Mbs, 当前文件 {1}Mbs.', upMaxSize / 1024 / 1024, Math.round(file.size / 1024 / 1024 * 100) / 100)});
@@ -392,7 +401,7 @@ package
             if (!_types)
             {
                 _types = [];
-                var arrFilters:Array = upTypes.split(';');
+                var arrFilters:Array = Tool.trim(upTypes, ';').split(';');
                 for (var i:int = 0, len:int = arrFilters.length; i < len; i++)
                 {
                     var filter:Array = arrFilters[i].split(':');
@@ -401,15 +410,38 @@ package
                         if (filter[0] == '*')
                         {
                             filter[0] = 'All files';
-                            filter.push('*.*');
+                            filter.push('*');
                         }
-                        filter.push(filter[0]);
+                        else
+                        {
+                            filter.push(filter[0]);
+                        }
                     }
-                    var types:Array = filter[1].split(',');
+                    var types:Array = filter[1].replace(/\s/g, '').split(',');
                     _types.push(new FileFilter(filter[0], '*.' + types.join(';*.')));
+                    _exts = _exts.concat(types);
                 }
             }
             return _types;
+        }
+        
+        /**
+         * 匹配扩展名的正则
+         */
+        private function get typeReg():RegExp 
+        {
+            if (!_typeReg)
+            {
+                if (_exts.indexOf('*') != -1)
+                {
+                    _typeReg = /.*/;
+                }
+                else
+                {
+                    _typeReg = new RegExp(_exts.join('|'), 'i');
+                }
+            }
+            return _typeReg;
         }
 
         /**
