@@ -118,11 +118,12 @@ package org.phpz.utils
          * @param	string
          * @return
          */
-        public static function trim(string:String):String
+        public static function trim(string:String, search:String = '\\s'):String
         {
+            var reg:RegExp = new RegExp('^' + search + '+|' + search + '+$', 'g');
             if (string)
             {
-                return string.replace(/^\s+|\s+$/g, '');
+                return string.replace(reg, '');
             }
             else
             {

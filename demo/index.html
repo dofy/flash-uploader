@@ -102,7 +102,7 @@ function trim(str)
 <!-- 嵌入 Flash -->
 <div id="flashUploader"></div>
 <script type="text/javascript">
-var flashvars = { id: 1, jsobj: "js4swf", url: "../demo/upload.php" };
+var flashvars = { id: 1, jsobj: "js4swf", url: "../demo/upload.php", types: "图片文件:jpg,jpeg,png,gif;视频文件:mov,flv" };
 var params = { allowScriptAccess: "allways" };
 var attributes = { };
 swfobject.embedSWF("../bin/flashUploader.swf", "flashUploader", "450", "45", "10.0.0", null, flashvars, params, attributes);
