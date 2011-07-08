@@ -81,7 +81,7 @@ package org.phpz.utils
         }
 
         /**
-         * 添加
+         * 添加参数到地址
          * @param	url
          * @param	params
          * @return
